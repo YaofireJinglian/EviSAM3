@@ -1,0 +1,104 @@
+# =========================================================
+# EviSAM3: Referring Remote Sensing Image Segmentation
+# Dataset: RefSegRS with SAM3 backbone + EviSAM innovations
+# =========================================================
+
+# ---------- Dataset ----------
+refer_data_root: ${DATA_ROOT}/RefSegRS
+dataset_name: refsegrs
+img_size: 1008
+evf_img_size: 224
+
+train_dataset:
+  dataset:
+    name: refsegrs-refer
+    args:
+      refer_data_root: ${DATA_ROOT}/RefSegRS
+      split: train
+      img_size: 1008
+      evf_img_size: 224
+      eval_mode: false
+  wrapper:
+    name: rrsisd-train
+  batch_size: 4
+
+val_dataset:
+  dataset:
+    name: refsegrs-refer
+    args:
+      refer_data_root: ${DATA_ROOT}/RefSegRS
+      split: val
+      img_size: 1008
+      evf_img_size: 224
+      eval_mode: true
+  wrapper:
+    name: rrsisd-val
+  batch_size: 1
+
+test_dataset:
+  dataset:
+    name: refsegrs-refer
+    args:
+      refer_data_root: ${DATA_ROOT}/RefSegRS
+      split: test
+      img_size: 1008
+      evf_img_size: 224
+      eval_mode: true
+  wrapper:
+    name: rrsisd-val
+  batch_size: 1
+
+# ---------- Pretrained Models ----------
+sam_checkpoint: ${CKPT_ROOT}/sam3.pt
+encoder_pretrained: ${CKPT_ROOT}/beit3_large_patch16_224.pth
+beit3_spm: ${CKPT_ROOT}/beit3.spm
+
+# ---------- Model ----------
+model:
+  name: evf-sam3
+  args:
+    inp_size: 1008
+    loss: iou
+    mm_extractor_scale: large
+    hidden_size: 1024
+    out_dim: 256
+    encoder_pretrained: ${CKPT_ROOT}/beit3_large_patch16_224.pth
+    # MoE config
+    use_moe_prompt: true
+    moe_balance_weight: 0.01
+    moe_num_extra_tokens: 1
+    moe_gate_init: -6.0
+    moe_gamma_init: 0.001
+    moe_temperature: 1.5
+    # SAM3 decoder
+    prompt_embed_dim: 256
+    use_high_res_features_in_sam: true
+    directly_add_no_mem_embed: true
+    iou_prediction_use_sigmoid: false
+    pred_obj_scores: true
+    pred_obj_scores_mlp: false
+    use_multimask_token_for_obj_ptr: true
+    encoder_mode:
+      name: sam
+      embed_dim: 1024
+      depth: 32
+      num_heads: 16
+      prompt_embed_dim: 256
+      patch_size: 14
+
+# ---------- Training ----------
+optimizer:
+  name: adamw
+  args:
+    lr: 0.00002
+lr_bifit: 0.0001
+lr_moe: 0.0001
+lr_min: 1.0e-7
+epoch_max: 60
+epoch_val: 1
+weight_decay: 0.01
+precision: fp32
+
+# ---------- Evaluation ----------
+eval_type: iou
+eval_thresholds: [0.5, 0.6, 0.7, 0.8, 0.9]

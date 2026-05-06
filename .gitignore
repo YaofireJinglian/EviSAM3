@@ -1,0 +1,35 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Conda / venv
+env/
+venv/
+.env/
+
+# Data & datasets
+data/
+datasets/
+*.npy
+*.npz
+
+# Model weights
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.tar.gz
+*.zip
+
+# Logs & outputs
+runs/
+logs/
+outputs/
+tensorboard/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
