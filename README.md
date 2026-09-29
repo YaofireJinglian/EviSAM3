@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/banner.svg" alt="EviSAM3 — Evidence-Driven SAM3 for Referring Remote Sensing Image Segmentation" width="100%">
+  <img src="docs/assets/banner-anime.png" alt="EviSAM3 anime banner with a remote sensing city map and animal expert mascots" width="100%">
 </p>
 
 <h1 align="center" id="evisam3">EviSAM3</h1>
