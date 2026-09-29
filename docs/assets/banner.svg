@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-labelledby="title desc">
+  <title id="title">EviSAM3</title>
+  <desc id="desc">Evidence-Driven SAM3 for Referring Remote Sensing Image Segmentation. Paper test mIoU: 70.65 on RRSIS-D and 80.56 on RefSegRS.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b1225"/><stop offset="1" stop-color="#122b3b"/></linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5eead4"/><stop offset="1" stop-color="#93c5fd"/></linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="#a5d7ee" stroke-opacity=".055"/></pattern>
+    <clipPath id="round"><rect width="1280" height="360" rx="22"/></clipPath>
+  </defs>
+  <g clip-path="url(#round)">
+    <rect width="1280" height="360" fill="url(#bg)"/>
+    <rect width="1280" height="360" fill="url(#grid)"/>
+    <circle cx="1180" cy="74" r="232" fill="none" stroke="#5eead4" stroke-opacity=".10"/>
+    <circle cx="1180" cy="74" r="195" fill="none" stroke="#5eead4" stroke-opacity=".08"/>
+    <circle cx="1180" cy="74" r="150" fill="none" stroke="#93c5fd" stroke-opacity=".10"/>
+    <rect x="54" y="40" width="5" height="20" rx="2" fill="#5eead4"/>
+    <g font-family="Segoe UI,Arial,sans-serif">
+      <text x="74" y="56" font-size="16" letter-spacing="3" fill="#8ca8bd">NEURIPS 2026 · ACCEPTED</text>
+      <text x="52" y="162" font-size="94" font-weight="750" letter-spacing="-3" fill="url(#accent)">EviSAM3</text>
+      <text x="56" y="215" font-size="30" font-weight="600" fill="#edf6fc">Evidence-Driven SAM3</text>
+      <text x="56" y="252" font-size="22" fill="#a7bfce">Referring Remote Sensing Image Segmentation</text>
+      <rect x="876" y="77" width="162" height="176" rx="16" fill="#152e40" stroke="#345164"/>
+      <rect x="1054" y="77" width="170" height="176" rx="16" fill="#152e40" stroke="#345164"/>
+      <text x="900" y="113" font-size="17" fill="#a7bfce">RRSIS-D</text>
+      <text x="900" y="172" font-size="46" font-weight="700" fill="#5eead4">70.65</text>
+      <text x="900" y="214" font-size="16" fill="#b9d1dc">Test mIoU (%)</text>
+      <text x="1075" y="113" font-size="17" fill="#a7bfce">RefSegRS</text>
+      <text x="1075" y="172" font-size="46" font-weight="700" fill="#93c5fd">80.56</text>
+      <text x="1075" y="214" font-size="16" fill="#b9d1dc">Test mIoU (%)</text>
+      <path d="M56 289H1224" stroke="#476176" stroke-opacity=".55"/>
+      <circle cx="63" cy="321" r="4" fill="#5eead4"/>
+      <text x="78" y="327" font-size="16" letter-spacing="1.2" fill="#b9d1dc">PROGRESSIVE EVIDENCE</text>
+      <circle cx="370" cy="321" r="4" fill="#93c5fd"/>
+      <text x="385" y="327" font-size="16" letter-spacing="1.2" fill="#b9d1dc">EXPERT PROMPTING</text>
+      <circle cx="645" cy="321" r="4" fill="#c4b5fd"/>
+      <text x="660" y="327" font-size="16" letter-spacing="1.2" fill="#b9d1dc">SAM3 ADAPTATION</text>
+      <text x="1224" y="327" text-anchor="end" font-size="13" fill="#809bad">RESULTS REPORTED IN THE PAPER</text>
+    </g>
+  </g>
+</svg>
