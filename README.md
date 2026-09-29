@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="mailto:wiyhduan@mail.scut.edu.cn">Yuhang Duan</a><sup>2,*</sup> &nbsp;·&nbsp;
+  <a href="mailto:wiyhduan@mail.scut.edu.cn">Yuhang Duan</a><sup>1,2,*</sup> &nbsp;·&nbsp;
   <a href="mailto:wxs@mail.dlut.edu.cn">Xiaoshuai Wu</a><sup>1,*</sup> &nbsp;·&nbsp;
   <a href="mailto:zhangcq23@mails.tsinghua.edu.cn">Chengqi Zhang</a><sup>3</sup><br>
   <a href="mailto:lujc22@mails.tsinghua.edu.cn">Jincheng Lu</a><sup>4</sup> &nbsp;·&nbsp;
