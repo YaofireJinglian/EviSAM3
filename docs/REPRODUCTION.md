@@ -140,9 +140,7 @@ Direct Python commands should be run from the repository root after setting
 ## Code organization
 
 Use `tools/train.py` and `tools/evaluate.py` for EviSAM3. Task-specific analysis
-lives in `tools/evaluation/` and `tools/visualization/`. Older segmentation
-entrypoints and SOD utilities live in `legacy/`, with configurations under
-`configs/legacy/`. The integrated SAM3 implementation retains its existing
+lives in `tools/evaluation/` and `tools/visualization/`. The integrated SAM3 implementation retains its existing
 `models/sam3/` import path. Upstream evaluation utilities are preserved in
 `third_party/sam3_eval/`; BEiT3 and TorchScale live in `third_party/unilm/`.
 

@@ -191,15 +191,14 @@ The paper tables and the current standalone evaluator use different threshold ag
 ```text
 EviSAM3/
 ├── configs/
-│   ├── evisam3/                # RRSIS-D and RefSegRS configurations
-│   └── legacy/                 # Earlier segmentation configurations
+│   └── evisam3/                # RRSIS-D and RefSegRS configurations
 ├── tools/
 │   ├── train.py                # Distributed EviSAM3 training
 │   ├── evaluate.py             # Distributed EviSAM3 evaluation
 │   ├── evaluation/             # SAM3 baseline and ablation evaluation
 │   └── visualization/          # Strength maps, saliency, and token embeddings
 ├── scripts/                    # Portable launchers grouped by task
-├── models/                     # EviSAM3, legacy SAM, and integrated SAM3 code
+├── models/                     # EviSAM3 and integrated SAM3 code
 ├── lib/                        # Evidence rectification and expert modules
 ├── arc/                        # Adaptive Rotated Convolution
 ├── refer/                      # REFER annotation interface
@@ -207,7 +206,6 @@ EviSAM3/
 ├── third_party/
 │   ├── unilm/                  # One copy of BEiT3 and TorchScale
 │   └── sam3_eval/              # Upstream evaluation and dataset utilities
-├── legacy/                     # Earlier training/evaluation and SOD utilities
 └── docs/                       # Paper, figures, and reproduction notes
 ```
 
