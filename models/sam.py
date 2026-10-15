@@ -210,7 +210,7 @@ class SAM(nn.Module):
 
     def forward(self, input, gt_mask=None):
         # bs = 2
-         # 1. 接收数据
+         # 1. Receive input data.
         self.input = input.to(self.device)
         if gt_mask is not None:
             self.gt_mask = gt_mask.to(self.device)
@@ -256,7 +256,7 @@ class SAM(nn.Module):
         #     feat.permute(1, 2, 0).view(2, -1, *feat_size)
         #     for feat, feat_size in zip(vision_feats[::-1], self._bb_feat_sizes[::-1])
         # ][::-1]
-        feats = [feat.permute(1, 2, 0).view(bs, -1, *feat_size) # 显式使用 bs 而不是 2
+        feats = [feat.permute(1, 2, 0).view(bs, -1, *feat_size) # Use the actual batch size instead of a fixed value of two.
                     for feat, feat_size in zip(vision_feats[::-1], feat_sizes[::-1])
                 ][::-1]
 
@@ -270,14 +270,14 @@ class SAM(nn.Module):
         image_embed = self._features["image_embed"]
         H_feat, W_feat = image_embed.shape[-2], image_embed.shape[-1]
 
-        # 1. 准备 Sparse Embeddings (空)
+        # 1. Prepare empty sparse embeddings.
         sparse_embeddings = torch.empty((bs, 0, self.prompt_embed_dim), device=self.input.device)
         
-        # 2. 准备 Dense Embeddings (并动态调整尺寸)
+        # 2. Prepare dense embeddings and adjust their spatial size.
         dense_embeddings = self.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
             bs, -1, self.image_embedding_size, self.image_embedding_size
         )
-        # 如果尺寸不一致，进行插值缩放
+        # Interpolate when spatial dimensions do not match.
         if dense_embeddings.shape[-2] != H_feat or dense_embeddings.shape[-1] != W_feat:
             dense_embeddings = F.interpolate(
                 dense_embeddings, 
@@ -286,7 +286,7 @@ class SAM(nn.Module):
                 align_corners=False
             )
 
-        # 3. 准备 Positional Encodings (并动态调整尺寸)
+        # 3. Prepare positional encodings and adjust their spatial size.
         image_pe = self.get_dense_pe()
         if image_pe.shape[-2] != H_feat or image_pe.shape[-1] != W_feat:
             image_pe = F.interpolate(
@@ -318,13 +318,13 @@ class SAM(nn.Module):
         # if not False:
         #     # masks = masks > self.mask_threshold
         #     masks = masks > 0.0
-              # 【新增】直接返回 Loss
+              # Return the loss directly.
         if gt_mask is not None:
             loss_G = self.criterionBCE(self.pred_mask, self.gt_mask)
             if self.loss_mode == 'iou':
                 loss_G += _iou_loss(self.pred_mask, self.gt_mask)
             self.loss_G = loss_G 
-            return loss_G  # 返回给 DDP
+            return loss_G  # Return the loss to DDP.
         else:
             return self.pred_mask
         # self.pred_mask = masks
@@ -392,10 +392,10 @@ class SAM(nn.Module):
     def postprocess_masks(
         self,
         masks: torch.Tensor,
-        input_size: int,      # 注意：这里传进来的是 int (1008)
+        input_size: int,      # The input size is an integer (1008).
         original_size: int,
     ) -> torch.Tensor:
-        # 直接插值到目标尺寸 (1008, 1008)
+        # Interpolate directly to the target size (1008, 1008).
         masks = F.interpolate(
             masks,
             (input_size, input_size),

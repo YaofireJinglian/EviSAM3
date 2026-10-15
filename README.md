@@ -142,8 +142,8 @@ Follow the [environment setup](docs/REPRODUCTION.md#environment) for SAM3, BEiT3
 
 | Resource | Source | Configuration |
 | :--- | :--- | :--- |
-| **RRSIS-D** | [Official RMSIN repository](https://github.com/Lsan2401/RMSIN) | [RRSIS-D config](configs/rrsisd-evf-sam3.yaml) |
-| **RefSegRS** | [Official RRSIS repository](https://github.com/zhu-xlab/rrsis) · [Dataset](https://huggingface.co/datasets/JessicaYuan/RefSegRS) | [RefSegRS config](configs/refsegrs-evf-sam3.yaml) |
+| **RRSIS-D** | [Official RMSIN repository](https://github.com/Lsan2401/RMSIN) | [RRSIS-D config](configs/evisam3/rrsisd-evf-sam3.yaml) |
+| **RefSegRS** | [Official RRSIS repository](https://github.com/zhu-xlab/rrsis) · [Dataset](https://huggingface.co/datasets/JessicaYuan/RefSegRS) | [RefSegRS config](configs/evisam3/refsegrs-evf-sam3.yaml) |
 | **SAM3** | [Official repository](https://github.com/facebookresearch/sam3) · [Weights](https://huggingface.co/facebook/sam3) | `sam_checkpoint` |
 | **BEiT3 Large** | [Official BEiT3 repository](https://github.com/microsoft/unilm/tree/master/beit3) | `encoder_pretrained` |
 | **BEiT3 tokenizer** | [Official tokenizer instructions](https://github.com/microsoft/unilm/tree/master/beit3#text-tokenizer) | `beit3_spm` |
@@ -159,14 +159,14 @@ Once the environment and paths are configured:
 ```bash
 # RRSIS-D: four GPUs
 CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --standalone --nproc_per_node=4 \
-  train_evf.py \
-  --config configs/rrsisd-evf-sam3.yaml \
+  tools/train.py \
+  --config configs/evisam3/rrsisd-evf-sam3.yaml \
   --name rrsisd_evfsam3
 
 # RefSegRS: four GPUs
 CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --standalone --nproc_per_node=4 \
-  train_evf.py \
-  --config configs/refsegrs-evf-sam3.yaml \
+  tools/train.py \
+  --config configs/evisam3/refsegrs-evf-sam3.yaml \
   --name refsegrs_evfsam3
 ```
 
@@ -176,13 +176,13 @@ Use `--resume /absolute/path/to/model_epoch_last.pth` to resume training. The en
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 torchrun --standalone --nproc_per_node=1 \
-  test_evf.py \
-  --config configs/rrsisd-evf-sam3.yaml \
+  tools/evaluate.py \
+  --config configs/evisam3/rrsisd-evf-sam3.yaml \
   --checkpoint /absolute/path/to/model_epoch_best.pth \
   --split test
 ```
 
-For RefSegRS, use `configs/refsegrs-evf-sam3.yaml`. Set `--split val` for validation.
+For RefSegRS, use `configs/evisam3/refsegrs-evf-sam3.yaml`. Set `--split val` for validation.
 
 The paper tables and the current standalone evaluator use different threshold aggregation; see the [evaluation protocol](docs/REPRODUCTION.md#evaluation-protocol). Trained EviSAM3 weights are not bundled with this repository.
 
@@ -190,36 +190,57 @@ The paper tables and the current standalone evaluator use different threshold ag
 
 ```text
 EviSAM3/
-├── arc/                       # Adaptive Rotated Convolution
-├── configs/                   # Dataset and model configurations
-├── datasets/                  # Dataset registry, loaders, and wrappers
-├── docs/                      # Paper, figures, and preparation guide
-├── lib/
-│   ├── evf_modules.py         # Evidence rectification and expert prompting
-│   └── unilm/                 # BEiT3 and TorchScale components
-├── models/
-│   ├── evf_sam3.py            # EviSAM3 model
-│   └── sam3/                  # SAM3 components
-├── refer/                     # REFER annotation interface
-├── scripts/                   # Baselines, ablations, and visualizations
-├── train_evf.py               # Distributed training
-└── test_evf.py                # Distributed evaluation
+├── configs/
+│   ├── evisam3/                # RRSIS-D and RefSegRS configurations
+│   └── legacy/                 # Earlier segmentation configurations
+├── tools/
+│   ├── train.py                # Distributed EviSAM3 training
+│   ├── evaluate.py             # Distributed EviSAM3 evaluation
+│   ├── evaluation/             # SAM3 baseline and ablation evaluation
+│   └── visualization/          # Strength maps, saliency, and token embeddings
+├── scripts/                    # Portable launchers grouped by task
+├── models/                     # EviSAM3, legacy SAM, and integrated SAM3 code
+├── lib/                        # Evidence rectification and expert modules
+├── arc/                        # Adaptive Rotated Convolution
+├── refer/                      # REFER annotation interface
+├── transforms_evf.py           # Dataset transforms (stable import path)
+├── third_party/
+│   ├── unilm/                  # One copy of BEiT3 and TorchScale
+│   └── sam3_eval/              # Upstream evaluation and dataset utilities
+├── legacy/                     # Earlier training/evaluation and SOD utilities
+└── docs/                       # Paper, figures, and reproduction notes
 ```
 
-The original code package includes `datasets/`. If it is absent from a fresh Git checkout, see the [source module note](docs/REPRODUCTION.md#dataset-source-module).
+The project-specific `datasets/` source package is not present in this checkout.
+It is required for training and evaluation; see the
+[source module note](docs/REPRODUCTION.md#dataset-source-module).
+The ignore rules now allow these Python sources to be tracked when restored.
+
+Convenience launchers run from any working directory:
+
+```bash
+bash scripts/train/rrsisd.sh 4
+bash scripts/train/refsegrs.sh 4
+bash scripts/evaluation/rrsisd.sh /absolute/path/to/model_epoch_best.pth test
+bash scripts/visualization/text_saliency.sh /absolute/path/to/model_epoch_best.pth
+```
+
+Set `CUDA_VISIBLE_DEVICES`, `PYTHON_BIN`, and `LOG_ROOT` as needed. Additional
+arguments are forwarded to the Python entrypoint. Relative checkpoint paths
+are resolved from the repository root.
 
 <details>
 <summary><strong>Analysis and visualization tools</strong></summary>
 
 | Tool | Purpose |
 | :--- | :--- |
-| [`eval_sam3_baseline.py`](scripts/eval_sam3_baseline.py) | Evaluate the SAM3 baseline |
-| [`eval_ablation.py`](scripts/eval_ablation.py) | Evaluate model ablations |
-| [`visualize_strength_map.py`](scripts/visualize_strength_map.py) | Analyze gains by object scale and query length |
-| [`visualize_text_saliency.py`](scripts/visualize_text_saliency.py) | Visualize textual cue saliency |
-| [`visualize_token_umap.py`](scripts/visualize_token_umap.py) | Inspect token representations |
+| [`sam3_baseline.py`](tools/evaluation/sam3_baseline.py) | Evaluate the SAM3 baseline |
+| [`ablation.py`](tools/evaluation/ablation.py) | Evaluate model ablations |
+| [`strength_map.py`](tools/visualization/strength_map.py) | Analyze gains by object scale and query length |
+| [`text_saliency.py`](tools/visualization/text_saliency.py) | Visualize textual cue saliency |
+| [`token_umap.py`](tools/visualization/token_umap.py) | Inspect token representations |
 
-Use the Python entrypoints with explicit paths. Some shell wrappers contain machine-specific environment variables.
+Use the Python entrypoints with explicit paths, or the task-specific launchers under `scripts/`. No launcher selects a fixed GPU index.
 
 </details>
 

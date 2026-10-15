@@ -39,7 +39,9 @@ from lib.evf_modules import (
     VLFusionTokenModule,
     Identity3,
 )
-from lib.unilm.beit3.modeling_utils import BEiT3Wrapper, _get_base_config, _get_large_config
+sys.path.insert(0, os.path.join(_project_root, "third_party", "unilm"))
+
+from third_party.unilm.beit3.modeling_utils import BEiT3Wrapper, _get_base_config, _get_large_config
 
 
 def dice_loss(inputs, targets, num_masks, scale=1000, eps=1e-6):

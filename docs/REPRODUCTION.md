@@ -24,14 +24,14 @@ python -m pip install \
   einops sentencepiece fairscale huggingface_hub iopath \
   ftfy regex pycocotools psutil
 
-export PYTHONPATH="$PWD/lib/unilm:$PWD/models:$PWD:${PYTHONPATH:-}"
+export PYTHONPATH="$PWD/third_party/unilm:$PWD/models:$PWD:${PYTHONPATH:-}"
 ```
 
 The CUDA wheel pairing follows the [official PyTorch version instructions](https://pytorch.org/get-started/previous-versions/#v270). The supplemental packages above are derived from repository imports. This setup has not been verified by an end-to-end training run. Additional dependencies may be needed by optional analysis tools.
 
 The old root `requirements.txt` references Python 3.11 / PyTorch 2.3-era dependencies, including NumPy 1.24 and Pillow 9.4. It should be reconciled with the SAM3 requirements before being used in a Python 3.12 environment.
 
-`lib/unilm/` exposes the bundled TorchScale package. Keep it on `PYTHONPATH` so BEiT3 can resolve imports such as `torchscale.model.BEiT3`. The project already includes SAM3 code under `models/`; preserve those local components when using pretrained SAM3 weights.
+`third_party/unilm/` exposes the bundled TorchScale package. Keep it on `PYTHONPATH` so BEiT3 can resolve imports such as `torchscale.model.BEiT3`. The project already includes SAM3 code under `models/`; preserve those local components when using pretrained SAM3 weights.
 
 ## Dataset source module
 
@@ -47,9 +47,13 @@ datasets/
 └── wrappers.py
 ```
 
-These files define the local `datasets.make(...)` registry used by `train_evf.py` and `test_evf.py`. This is the project's own module; installing Hugging Face's similarly named `datasets` package does not supply this registry.
+These files define the local `datasets.make(...)` registry used by `tools/train.py` and `tools/evaluate.py`. This is the project's own module; installing Hugging Face's similarly named `datasets` package does not supply this registry.
 
-At the inspected Git revision, the root `.gitignore` contains `datasets/`, which also excludes these source files. If a checkout lacks this directory, copy the original module into the repository root. When publishing the full code, change that ignore rule to the actual data storage directory or explicitly track the six Python source files.
+The Git checkout currently lacks this source package. Restore the original six
+Python files to `datasets/` before running training or evaluation. The root
+`.gitignore` now excludes only `/data/` and checkpoint/output directories, so
+restored dataset source files can be committed normally. The cleanup does not
+substitute an unverified loader implementation for the missing source.
 
 ## Data and weights
 
@@ -117,30 +121,30 @@ The provided YAML files currently use a base learning rate of `2e-5`, adapter/ex
 
 ## Output paths
 
-The current training source constructs its output directory with:
-
-```python
-save_path = os.path.join('${LOG_ROOT}', save_name)
-```
-
-Python treats that string literally. An unchanged entrypoint creates a directory named `${LOG_ROOT}` under the working directory, even if a shell variable with the same name exists.
-
-To use an environment variable with a local fallback, replace that line with:
-
-```python
-save_path = os.path.join(os.environ.get("LOG_ROOT", "save"), save_name)
-```
-
-With this adjustment and `--name rrsisd_evfsam3`, outputs are:
+Training uses the `LOG_ROOT` environment variable and defaults to `outputs/`.
+With `--name rrsisd_evfsam3`, the default checkpoint paths are:
 
 ```text
-save/rrsisd_evfsam3/
+outputs/rrsisd_evfsam3/
 ├── config.yaml
 ├── model_epoch_last.pth
 └── model_epoch_best.pth
 ```
 
-Set `LOG_ROOT` before launching to choose a different directory. For an unchanged entrypoint, use the actual checkpoint path under the literal directory when evaluating.
+The launchers in `scripts/` resolve the repository root automatically and set
+`PYTHONPATH` for local modules. They use `python` unless `PYTHON_BIN` is set,
+respect `CUDA_VISIBLE_DEVICES`, and forward additional command-line arguments.
+Direct Python commands should be run from the repository root after setting
+`PYTHONPATH` as shown in the environment section.
+
+## Code organization
+
+Use `tools/train.py` and `tools/evaluate.py` for EviSAM3. Task-specific analysis
+lives in `tools/evaluation/` and `tools/visualization/`. Older segmentation
+entrypoints and SOD utilities live in `legacy/`, with configurations under
+`configs/legacy/`. The integrated SAM3 implementation retains its existing
+`models/sam3/` import path. Upstream evaluation utilities are preserved in
+`third_party/sam3_eval/`; BEiT3 and TorchScale live in `third_party/unilm/`.
 
 ## Evaluation protocol
 
@@ -150,8 +154,8 @@ For the usual benchmark protocol, binarize each predicted probability map at a f
 - **mIoU:** mean sample IoU.
 - **oIoU:** total intersection divided by total union.
 
-The [training evaluator](../train_evf.py) uses a fixed probability threshold of 0.5 before applying the IoU thresholds.
+The [training evaluator](../tools/train.py) uses a fixed probability threshold of 0.5 before applying the IoU thresholds.
 
-The current [standalone test evaluator](../test_evf.py) instead changes the mask probability threshold across 0.5–0.9, computes metrics at each threshold, and averages those mIoU/oIoU values. It also uses the same threshold for the corresponding precision calculation. Its aggregate outputs are therefore not directly comparable to the paper tables under the fixed-threshold protocol.
+The current [standalone test evaluator](../tools/evaluate.py) instead changes the mask probability threshold across 0.5–0.9, computes metrics at each threshold, and averages those mIoU/oIoU values. It also uses the same threshold for the corresponding precision calculation. Its aggregate outputs are therefore not directly comparable to the paper tables under the fixed-threshold protocol.
 
 When reproducing the reported benchmark numbers, align the standalone evaluation with the fixed mask threshold, the intended caption policy, and the dataset split. Both entrypoints currently select the first available caption during evaluation. Use an explicitly supplied, existing trained EviSAM3 checkpoint; the standalone evaluator otherwise continues without loading one.

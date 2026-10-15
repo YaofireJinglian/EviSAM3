@@ -8,8 +8,9 @@ venv/
 .env/
 
 # Data & datasets
-data/
-datasets/
+/data/
+# Keep the datasets/ Python source package trackable.
+/checkpoints/
 *.npy
 *.npz
 
